@@ -1,7 +1,7 @@
 {
-  "id": "talha-inventory-billing-app",
-  "name": "Talha Inventory & Billing",
-  "short_name": "Talha Billing",
+  "id": "retailer-inventory-billing-app",
+  "name": "Retailer Dost",
+  "short_name": "Retailer Dost",
   "description": "Inventory rate finder, stock management, and 80mm thermal billing app.",
   "start_url": "./index.html",
   "scope": "./",
