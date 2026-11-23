@@ -1,11 +1,26 @@
 {
+  "id": "talha-inventory-billing-app",
   "name": "Talha Inventory & Billing",
   "short_name": "Talha Billing",
+  "description": "Inventory rate finder, stock management, and 80mm thermal billing app.",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#0b192c",
   "theme_color": "#0b192c",
   "orientation": "portrait",
+  "categories": ["business", "productivity"],
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  },
+  "shortcuts": [
+    {
+      "name": "Items Search",
+      "short_name": "Search",
+      "url": "./index.html",
+      "icons": [{ "src": "icon.png", "sizes": "512x512", "type": "image/png" }]
+    }
+  ],
   "icons": [
     {
       "src": "icon.png",
