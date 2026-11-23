@@ -1,0 +1,1668 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Item Rate Finder & Billing</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0b192c">
+<style>
+:root{font-family:Segoe UI,Roboto,Arial,sans-serif;color:#18212f;background:#f4f6f8}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;padding:0 0 60px;background:#f4f6f8;color:#18212f;line-height:1.4;overflow-x:hidden}
+
+/* Top Header & MS Word Style Shutter Menu */
+header{background:linear-gradient(135deg,#0b192c 0%,#16325c 100%);color:white;padding:10px 14px;position:sticky;top:0;z-index:120;box-shadow:0 4px 16px rgba(11,25,44,0.22)}
+.top-bar{max-width:960px;margin:auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.brand-col{display:flex;flex-direction:column;min-width:0;flex:1}
+.app-title{font-size:16px;font-weight:800;margin:0;letter-spacing:0.2px;line-height:1.25}
+.app-sub{font-size:11px;color:#93c5fd;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.header-actions{display:flex;gap:6px;align-items:center;flex-shrink:0}
+
+.btn-shutter-arrow{
+  background:rgba(255,255,255,0.16);
+  border:1px solid rgba(255,255,255,0.32);
+  color:white;
+  width:34px;
+  height:34px;
+  border-radius:8px;
+  font-size:13px;
+  font-weight:800;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:0;
+  transition:0.15s;
+}
+.btn-shutter-arrow:hover{background:rgba(255,255,255,0.28)}
+
+.top-menu-bar{
+  max-width:960px;
+  margin:8px auto 0;
+  padding-top:8px;
+  border-top:1px solid rgba(255,255,255,0.14);
+  display:flex;
+  gap:7px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+.top-menu-bar.collapsed{display:none!important}
+
+.menu-nav-btn{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);color:white;padding:7px 12px;border-radius:9px;font-size:12.5px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:0.15s;min-height:36px}
+.menu-nav-btn:hover{background:rgba(255,255,255,0.22)}
+.menu-nav-btn.active{background:#2563eb;border-color:#93c5fd;box-shadow:0 0 0 2px rgba(37,99,235,0.35)}
+.menu-badge{background:#ef4444;color:white;font-size:10.5px;padding:1px 6px;border-radius:10px;font-weight:800}
+
+.btn-logout{background:#dc2626;color:white;border:none;padding:6px 10px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;min-height:34px}
+.btn-notif-bell{background:rgba(255,255,255,0.14);border:1px solid rgba(255,255,255,0.28);color:#fde68a;padding:6px 10px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;min-height:34px}
+
+/* Live Cross-User Alert Banner */
+#liveNotifBanner{position:fixed;top:96px;right:12px;left:12px;max-width:560px;margin:auto;background:#0f294a;color:white;border:2px solid #38bdf8;border-radius:12px;padding:11px 14px;box-shadow:0 12px 28px rgba(15,23,42,0.35);z-index:1500;display:none;align-items:flex-start;justify-content:space-between;gap:10px;font-size:13px}
+#liveNotifBanner.show{display:flex}
+
+.app{max-width:960px;margin:auto;padding:12px}
+.panel{background:white;border:1px solid #e2e7ee;border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 2px 10px #15223808}
+.search-panel{position:sticky;top:92px;z-index:90;border-color:#cbd5e1;box-shadow:0 4px 16px rgba(15,23,42,0.08);transition:top 0.15s ease}
+body.menu-collapsed .search-panel{top:64px}
+
+.search{width:100%;font-size:16px;padding:12px 14px;border:2px solid #d7dee8;border-radius:10px;outline:none;background:white}
+.search:focus,input:focus,select:focus{border-color:#2864dc}
+
+button,.filebtn{border:0;border-radius:9px;padding:10px 14px;font-weight:600;cursor:pointer;background:#245bd3;color:white;font-size:13px;transition:0.2s;display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:40px}
+button:disabled,.filebtn:disabled{opacity:0.6;cursor:not-allowed}
+button.secondary,.filebtn.secondary{background:#edf1f7;color:#263448}
+button.success{background:#16834b;color:white}
+button.sync-pending{background:#d97706;color:white}
+button.danger{background:#fff0f0;color:#a32828}
+.btn-sm{padding:6px 10px;font-size:12px;min-height:34px;border-radius:7px}
+
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center}
+input[type=text],input[type=number],input[type=password],input[type=date],select{padding:11px;border:1px solid #ccd4df;border-radius:8px;width:100%;font-size:15px;background:white}
+label{font-size:13px;color:#5c6878;display:block;margin:10px 0 5px;font-weight:600}
+.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pricegrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:4px}
+
+.autocomplete-wrap{position:relative}
+.autocomplete-list{position:absolute;top:100%;left:0;right:0;background:white;border:1px solid #cbd5e1;border-top:none;border-radius:0 0 10px 10px;max-height:220px;overflow-y:auto;z-index:200;box-shadow:0 10px 20px rgba(15,23,42,0.12)}
+.autocomplete-item{padding:10px 12px;cursor:pointer;border-bottom:1px solid #f1f5f9;font-size:13.5px;color:#1e293b;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.autocomplete-item:last-child{border-bottom:none}
+.autocomplete-item:hover,.autocomplete-item:active,.autocomplete-item.active{background:#dbeafe;color:#1e3a8a;font-weight:600}
+.ac-sub{font-size:11px;color:#475569;background:#f1f5f9;padding:2px 6px;border-radius:4px;white-space:nowrap}
+
+.result-wrapper{padding:14px 0;border-bottom:1px solid #edf0f4}
+.result-wrapper:last-child{border:0}
+.result{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.calc-panel{display:flex;gap:12px;align-items:center;background:#f8fafc;padding:12px;border-radius:8px;margin-top:10px;border:1px dashed #cbd5e1;flex-wrap:wrap}
+.calc-panel input{width:110px;padding:8px;font-size:15px;border:1px solid #cbd5e1;border-radius:6px;margin:0;background:white;font-weight:bold}
+.calc-panel label{margin:0 6px 0 0;display:inline-block;font-size:13px;color:#475569}
+.btn-deal{background:#eef2ff;color:#4338ca;border:1px solid #c7d2fe}
+.btn-bill-add{background:#e7f7ed;color:#16834b;border:1px solid #bbf7d0}
+
+.name{font-size:16px;font-weight:650;line-height:1.3}
+.meta{font-size:13px;color:#0055ff;margin-top:4px;font-weight:600}
+.prices{text-align:right}
+.price-sell{font-size:17px;font-weight:750;color:#18212f;white-space:nowrap}
+
+.privacy-mask{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  background:#e2e8f0;
+  border:1px dashed #94a3b8;
+  color:#334155;
+  padding:3px 8px;
+  border-radius:6px;
+  font-family:monospace;
+  font-size:12.5px;
+  font-weight:700;
+  cursor:pointer;
+  user-select:none;
+  transition:all 0.2s ease;
+}
+.privacy-mask.revealed{
+  background:#fef3c7;
+  border-color:#f59e0b;
+  color:#92400e;
+}
+.profit-good{background:#e7f7ed;color:#16834b;border-color:#86efac}
+.profit-bad{background:#fff0f0;color:#a32828;border-color:#fca5a5}
+
+.empty{text-align:center;color:#788394;padding:22px 8px;font-size:14px}
+.status-msg{font-size:13px;font-weight:bold;width:100%;margin-top:4px}
+#file{display:none}.hidden{display:none!important}
+
+.quick-pick-list{max-height:260px;overflow-y:auto;border:1px solid #e2e8f0;border-radius:9px;margin-top:10px;background:#fafbfc}
+.quick-pick-item{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid #edf0f4;gap:10px}
+.quick-pick-item:last-child{border:0}
+.qp-badges{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:5px}
+.qp-sell{font-size:11.5px;padding:2px 7px;border-radius:5px;font-weight:700;background:#dbeafe;color:#1e40af}
+
+.bill-table-wrap{width:100%;margin-top:12px;overflow-x:auto}
+table.bill-table{width:100%;border-collapse:collapse;font-size:14px}
+table.bill-table th{background:#f1f5f9;color:#334155;text-align:left;padding:9px 6px;border-bottom:2px solid #cbd5e1;font-weight:700}
+table.bill-table td{padding:8px 6px;border-bottom:1px solid #e2e8f0;vertical-align:middle}
+table.bill-table input.bill-inp{padding:6px 5px;font-size:13px;border:1px solid #cbd5e1;border-radius:6px;width:82px;text-align:right;font-weight:600}
+table.bill-table input.bill-qty{width:62px;text-align:center}
+
+.bill-summary-box{background:#f8fafc;border:2px solid #cbd5e1;border-radius:10px;padding:14px 16px;margin-top:14px;font-size:15px;font-weight:600}
+.bill-summary-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:8px;flex-wrap:wrap}
+.bill-summary-row.grand{font-size:18px;font-weight:800;border-top:1px dashed #cbd5e1;padding-top:8px;margin-top:8px}
+
+.login-screen{position:fixed;inset:0;background:linear-gradient(135deg,#0b192c,#1e3a8a);display:flex;align-items:center;justify-content:center;padding:16px;z-index:2000}
+.login-box{background:white;border-radius:16px;padding:24px;width:100%;max-width:380px;box-shadow:0 15px 35px rgba(0,0,0,0.35)}
+.forgot-link{background:none;border:none;color:#2563eb;font-size:13px;font-weight:700;cursor:pointer;padding:6px 0;min-height:auto;margin-top:8px;text-decoration:underline}
+
+/* 80mm Receipt Preview Modal + Print Styles */
+.print-modal-backdrop{position:fixed;inset:0;background:rgba(15,23,42,0.7);z-index:2500;display:none;align-items:center;justify-content:center;padding:14px}
+.print-modal-backdrop.open{display:flex}
+.print-modal-card{background:white;border-radius:14px;padding:16px;max-width:360px;width:100%;max-height:92vh;overflow-y:auto;box-shadow:0 20px 45px rgba(0,0,0,0.4)}
+.receipt-80mm-box{width:74mm;max-width:100%;margin:0 auto;font-family:monospace;font-size:8.5pt;line-height:1.25;color:#000;background:#fff;padding:3mm;box-sizing:border-box}
+
+#printInvoiceArea{display:none}
+@media print {
+  @page {
+    size: 80mm 220mm;
+    margin: 0mm;
+  }
+
+  html, body {
+    width: 80mm;
+    margin: 0;
+    padding: 3mm;
+    box-sizing: border-box;
+    font-family: monospace;
+    background: #fff;
+    color: #000;
+  }
+
+  body > *:not(#printInvoiceArea) { display: none !important; }
+  #printInvoiceArea {
+    display: block !important;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background: #fff;
+    color: #000;
+  }
+}
+
+@media(max-width:600px){
+  .app-title{font-size:14.5px}
+  .search-panel{top:122px}
+  body.menu-collapsed .search-panel{top:58px}
+  .formgrid{grid-template-columns:1fr;gap:6px}
+  .pricegrid{grid-template-columns:1fr 1fr;gap:10px}
+  .pricegrid > div:last-child{grid-column:1 / -1}
+  .result{align-items:flex-start;flex-direction:column}
+  .prices{text-align:left;margin-top:6px;width:100%}
+  .actions{justify-content:flex-start!important}
+  .item-controls{width:100%;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-top:10px}
+  .item-controls button{width:100%;padding:8px 4px;font-size:12px}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" class="login-screen">
+  <div class="login-box">
+    <h2 style="margin:0 0 4px;color:#0f294a;font-size:20px">Item Rate Finder &amp; Billing</h2>
+    <div style="font-size:12.5px;color:#64748b;margin-bottom:16px">Inventory &amp; Billing Login</div>
+    <input id="loginUser" type="text" placeholder="Username (e.g. admin)" style="margin-bottom:10px">
+    <input id="loginPass" type="password" placeholder="Password" style="margin-bottom:12px">
+    <button type="button" id="loginBtn" style="width:100%;padding:11px">Login</button>
+    <div style="text-align:center">
+      <button type="button" id="openForgotBtn" class="forgot-link">Forgot Password?</button>
+    </div>
+    <div id="loginErr" style="color:#dc2626;font-size:13px;font-weight:700;margin-top:10px"></div>
+  </div>
+</div>
+
+<!-- FORGOT PASSWORD MODAL -->
+<div id="forgotModal" class="print-modal-backdrop" style="z-index:2600">
+  <div class="print-modal-card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #e2e8f0">
+      <strong style="font-size:15px;color:#0f294a">Forgot Password</strong>
+      <button type="button" class="danger btn-sm" id="closeForgotBtn">✕</button>
+    </div>
+    <div style="font-size:12.5px;color:#475569;margin-bottom:10px">
+      Apna Username aur Registered Mobile Number daalein:
+    </div>
+    <input id="fpUsername" type="text" placeholder="Username (e.g. staff1)" style="margin-bottom:8px">
+    <input id="fpMobile" type="text" placeholder="Registered Mobile No. (10 digits)" style="margin-bottom:10px">
+    <button type="button" id="sendFpBtn" class="success" style="width:100%;margin-bottom:8px">Send Password (SMS / Email)</button>
+    <button type="button" id="waFpBtn" class="secondary" style="width:100%;background:#dcfce7;color:#15803d">WhatsApp Admin for Password</button>
+    <div id="fpStatus" style="font-size:12.5px;font-weight:700;margin-top:10px"></div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="mainApp" class="hidden">
+  <header>
+    <div class="top-bar">
+      <div class="brand-col">
+        <h1 class="app-title">ITEM RATE FINDER &amp; BILLING</h1>
+        <div class="app-sub">User: <strong id="loggedUserLabel"></strong> | Sync: <span id="syncTimeLabel">Ready</span></div>
+      </div>
+      <div class="header-actions">
+        <button type="button" class="btn-notif-bell" id="enableNotifBtn">Alerts: <span id="notifStateText">Off</span></button>
+        <button type="button" class="btn-logout" id="logoutBtn">Logout</button>
+        <button type="button" class="btn-shutter-arrow" id="toggleMenuShutterBtn" title="Hide / Show Menu" aria-label="Toggle Menu">▲</button>
+      </div>
+    </div>
+
+    <div class="top-menu-bar" id="topMenuBar">
+      <button type="button" class="menu-nav-btn active" data-sec="sec-search">Items Search (<span id="topItemCount">0</span>)</button>
+      <button type="button" class="menu-nav-btn" data-sec="sec-add">Add New Items</button>
+      <button type="button" class="menu-nav-btn" data-sec="sec-billing">Billing <span class="menu-badge" id="billBadgeCount">0</span></button>
+      <button type="button" class="menu-nav-btn" data-sec="sec-history">Billing History <span class="menu-badge" id="histBadgeCount" style="background:#0f766e">0</span></button>
+      <button type="button" class="menu-nav-btn hidden" id="usersTabBtn" data-sec="sec-users">Staff Users</button>
+    </div>
+  </header>
+
+  <!-- LIVE ACTIVITY BANNER -->
+  <div id="liveNotifBanner">
+    <div id="liveNotifText" style="line-height:1.4"></div>
+    <button type="button" id="closeNotifBannerBtn" style="background:rgba(255,255,255,0.18);color:white;border:none;border-radius:6px;padding:3px 8px;cursor:pointer;font-weight:bold;flex-shrink:0">✕</button>
+  </div>
+
+  <div class="app">
+
+    <!-- 1. ITEMS SEARCH -->
+    <div id="sec-search" class="app-sec">
+      <section class="panel search-panel">
+        <input id="search" class="search" type="search" placeholder="Search item or brand…" autofocus>
+        <div class="actions">
+          <button type="button" id="syncBtn">Sync Cloud</button>
+          <button type="button" class="success" id="dashboardAddBtn">Add New Item</button>
+          <label class="filebtn secondary" for="file" style="margin:0" id="uploadBtn">Import CSV</label>
+          <input id="file" type="file" accept=".csv,.txt,text/csv">
+          <button type="button" class="secondary" id="template">Sample CSV</button>
+          <div id="syncStatus" class="status-msg"></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:6px">
+          <strong>Inventory List (<span id="invCount">0</span> items)</strong>
+          <span style="font-size:11.5px;color:#64748b">Tap Buy / Margin badge to view for 5s</span>
+        </div>
+        <div id="results"><div class="empty">Loading inventory...</div></div>
+      </section>
+    </div>
+
+    <!-- 2. ADD NEW ITEMS -->
+    <div id="sec-add" class="app-sec hidden">
+      <section class="panel" id="addItemCard">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+          <strong id="formtitle" style="font-size:17px">Add New Item</strong>
+          <button type="button" class="secondary btn-sm" id="clearAddFormBtn">Clear</button>
+        </div>
+
+        <div class="formgrid">
+          <div class="autocomplete-wrap">
+            <label for="item">Item Name</label>
+            <input id="item" type="text" autocomplete="off" placeholder="Type item name (or existing word to clone)...">
+            <div id="itemSuggestions" class="autocomplete-list hidden"></div>
+          </div>
+          <div class="autocomplete-wrap">
+            <label for="brand">Brand Name</label>
+            <input id="brand" type="text" autocomplete="off" placeholder="e.g. Anchor / Havells">
+            <div id="brandSuggestions" class="autocomplete-list hidden"></div>
+          </div>
+        </div>
+
+        <div class="pricegrid">
+          <div>
+            <label for="buy">Purchase Price (₹)</label>
+            <input id="buy" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0">
+          </div>
+          <div>
+            <label for="margin">Profit Margin (%)</label>
+            <input id="margin" type="number" inputmode="decimal" step="0.1" placeholder="2 or 30">
+          </div>
+          <div>
+            <label for="sell">Sell Price (₹)</label>
+            <input id="sell" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0">
+          </div>
+        </div>
+
+        <div class="actions" style="margin-top:16px">
+          <button type="button" class="success" id="save" style="flex:1">Save Item</button>
+        </div>
+        <div id="addStatus" style="font-size:14px;font-weight:600;margin-top:12px;text-align:center"></div>
+      </section>
+    </div>
+
+    <!-- 3. BILLING -->
+    <div id="sec-billing" class="app-sec hidden">
+      <section class="panel">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+          <strong style="font-size:17px">1. Select Product from Inventory</strong>
+          <span style="background:#e0f2fe;color:#0369a1;padding:4px 10px;border-radius:6px;font-size:13px;font-weight:700" id="currentBillNoBadge">Bill No: 001</span>
+        </div>
+        <input id="billSearch" class="search" type="search" placeholder="Type product name or brand to add..." style="margin-top:10px;font-size:16px;padding:11px">
+        <div id="billQuickList" class="quick-pick-list"></div>
+      </section>
+
+      <section class="panel">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:10px">
+          <strong style="font-size:17px">2. Customer Bill (<span id="uiBillNoLabel">001</span>)</strong>
+          <div class="row">
+            <input id="billCustName" type="text" placeholder="Customer Name (Optional)" style="width:210px;padding:8px 10px;font-size:14px">
+            <input id="billDate" type="date" style="width:155px;padding:8px 10px;font-size:14px">
+          </div>
+        </div>
+
+        <div class="bill-table-wrap">
+          <table class="bill-table">
+            <thead>
+              <tr>
+                <th style="width:32px">#</th>
+                <th>Product Name</th>
+                <th style="width:92px;text-align:right">Rate (₹)</th>
+                <th style="width:68px;text-align:center">Qty</th>
+                <th style="width:95px;text-align:right">Total (₹)</th>
+                <th style="width:40px;text-align:center"></th>
+              </tr>
+            </thead>
+            <tbody id="billTableBody">
+              <tr><td colspan="6" class="empty">No items added to bill yet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="bill-summary-box">
+          <div class="bill-summary-row">
+            <span>Items Total:</span>
+            <span id="billSubTotal" style="font-weight:700">₹0.00</span>
+          </div>
+
+          <div class="bill-summary-row" style="margin-top:8px">
+            <label for="billAdjustment" style="margin:0;color:inherit;font-size:inherit">Adjustment (-/+ or -%/+%):</label>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span id="billAdjCalculated" style="font-size:13px;color:#475569;font-weight:700">₹0.00</span>
+              <input id="billAdjustment" type="text" placeholder="-50 or +10%" style="width:120px;padding:6px;font-size:15px;text-align:right;font-weight:bold">
+            </div>
+          </div>
+
+          <div class="bill-summary-row" style="border-top:1px solid #cbd5e1;padding-top:8px;margin-top:8px">
+            <span style="font-weight:800;font-size:17px">Grand Total:</span>
+            <span id="billGrandTotal" style="font-weight:800;font-size:17px;color:#1e293b">₹0.00</span>
+          </div>
+
+          <div class="bill-summary-row" style="margin-top:8px">
+            <label for="billAdvance" style="margin:0;color:inherit;font-size:inherit">Advance Paid (₹):</label>
+            <input id="billAdvance" type="number" inputmode="decimal" placeholder="Full Paid" min="0" step="0.01" style="width:120px;padding:6px;font-size:15px;text-align:right;font-weight:bold">
+          </div>
+
+          <div class="bill-summary-row grand hidden" id="dueAmountRow">
+            <span>Due Amount:</span>
+            <span id="billDueAmount" style="color:#b91c1c">₹0.00</span>
+          </div>
+        </div>
+
+        <div class="actions" style="margin-top:16px;justify-content:space-between">
+          <button type="button" class="danger" id="clearBillBtn">Clear / New Bill</button>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button type="button" class="success" id="saveBillBtn" style="padding:12px 18px;font-size:14px">Save Bill</button>
+            <button type="button" id="printOnlyBtn" style="padding:12px 18px;font-size:14px;background:#1e293b">Print (80mm)</button>
+          </div>
+        </div>
+        <div id="billActionStatus" style="font-size:13px;font-weight:700;margin-top:10px;text-align:right"></div>
+      </section>
+    </div>
+
+    <!-- 4. BILLING HISTORY -->
+    <div id="sec-history" class="app-sec hidden">
+      <section class="panel">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+          <strong style="font-size:17px">Billing History</strong>
+          <button type="button" class="secondary btn-sm" id="syncBillsBtn">Refresh Bills</button>
+        </div>
+        <input id="savedBillSearch" class="search" type="search" placeholder="Enter Bill No. (e.g. 001) or Customer Name..." style="margin-top:10px;font-size:16px;padding:11px">
+        <div id="savedBillsResults" style="margin-top:12px"><div class="empty">No saved bills yet.</div></div>
+      </section>
+    </div>
+
+    <!-- 5. STAFF USERS (ADMIN ONLY) -->
+    <div id="sec-users" class="app-sec hidden">
+      <section class="panel">
+        <strong style="font-size:17px;display:block;margin-bottom:10px">Manage Staff Accounts &amp; Permissions</strong>
+        <div class="row" style="margin-bottom:12px">
+          <input id="uNewName" type="text" placeholder="Username" style="width:150px">
+          <input id="uNewPass" type="text" placeholder="Password" style="width:150px">
+          <select id="uNewRole" style="width:120px">
+            <option value="Staff">Staff</option>
+            <option value="Admin">Admin</option>
+          </select>
+          <label style="margin:0"><input type="checkbox" id="uPermAdd" checked> Add</label>
+          <label style="margin:0"><input type="checkbox" id="uPermEdit" checked> Edit</label>
+          <label style="margin:0"><input type="checkbox" id="uPermDel"> Delete</label>
+          <button type="button" class="success" id="saveUserBtn">Save User</button>
+        </div>
+        <div class="bill-table-wrap">
+          <table class="bill-table">
+            <thead>
+              <tr><th>Username</th><th>Role</th><th>Add</th><th>Edit</th><th>Delete</th><th>Action</th></tr>
+            </thead>
+            <tbody id="usersTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+  </div>
+</div>
+
+<!-- 80MM PRINT PREVIEW MODAL -->
+<div id="printPreviewModal" class="print-modal-backdrop">
+  <div class="print-modal-card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #e2e8f0">
+      <strong style="font-size:14px;color:#0f294a">80mm Bill Preview</strong>
+      <button type="button" class="danger btn-sm" id="closePrintModalBtn">✕ Close</button>
+    </div>
+    <div id="printModalBody" class="receipt-80mm-box"></div>
+    <div class="actions" style="margin-top:12px;justify-content:flex-end">
+      <button type="button" class="success" id="triggerSystemPrintBtn" style="width:100%">🖨️ Print Receipt</button>
+    </div>
+  </div>
+</div>
+
+<!-- 80MM THERMAL ROLL PRINT INVOICE AREA -->
+<div id="printInvoiceArea"></div>
+
+<script>
+(function() {
+  const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbz20ij1xCB5TqOsxfWG9TsijfYDXVrGQbYA_RTkNOUALzUfgLDLPvyMI84BE3OwO0oWXA/exec';
+  const ADMIN_WA_NUMBER = '917980167138';
+  const $ = id => document.getElementById(id);
+
+  let currentUser = null;
+  let authCreds = { username: '', password: '' };
+  let items = JSON.parse(localStorage.getItem('talha_inv_cache') || '[]');
+  let savedBills = JSON.parse(localStorage.getItem('talha_bills_cache') || '[]');
+  let seenActivityKeys = new Set(JSON.parse(localStorage.getItem('talha_seen_act') || '[]'));
+  let lastKnownItemsMap = null;
+  let notifBannerTimer = null;
+  let pollingStarted = false;
+
+  let billItems = [];
+  let currentBillNo = '001';
+  let editingBillId = null;
+  let editingBillNo = null;
+  let editingItemId = null;
+
+  function escapeHtml(str) {
+    return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+  }
+
+  // ==========================================
+  // FORGOT PASSWORD HANDLERS
+  // ==========================================
+  $('openForgotBtn').onclick = () => {
+    $('fpUsername').value = $('loginUser').value.trim();
+    $('fpStatus').textContent = '';
+    $('forgotModal').classList.add('open');
+  };
+  $('closeForgotBtn').onclick = () => $('forgotModal').classList.remove('open');
+
+  $('sendFpBtn').onclick = async () => {
+    const username = $('fpUsername').value.trim();
+    const mobile = $('fpMobile').value.trim();
+    if (!username || !mobile) {
+      $('fpStatus').style.color = '#dc2626';
+      $('fpStatus').textContent = 'Username aur Mobile Number dono zaroori hain.';
+      return;
+    }
+    $('sendFpBtn').disabled = true;
+    $('fpStatus').style.color = '#2563eb';
+    $('fpStatus').textContent = 'Checking account...';
+    try {
+      const res = await fetch(WEB_APP_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'forgotPassword', username, mobile })
+      });
+      const data = await res.json();
+      $('fpStatus').style.color = data.status === 'success' ? '#16834b' : '#dc2626';
+      $('fpStatus').textContent = data.message || 'Done.';
+    } catch (e) {
+      $('fpStatus').style.color = '#dc2626';
+      $('fpStatus').textContent = 'Network error. Neeche WhatsApp button se Admin ko message karein.';
+    } finally {
+      $('sendFpBtn').disabled = false;
+    }
+  };
+
+  $('waFpBtn').onclick = () => {
+    const u = $('fpUsername').value.trim() || 'User';
+    const m = $('fpMobile').value.trim() || '';
+    const msg = encodeURIComponent(`Hello Admin, main apna Inventory App password bhool gaya hoon. Username: ${u}, Registered Mobile: ${m}`);
+    window.open(`https://wa.me/${ADMIN_WA_NUMBER}?text=${msg}`, '_blank');
+  };
+
+  // ==========================================
+  // MS WORD STYLE SHUTTER MENU TOGGLE (▲ / ▼)
+  // ==========================================
+  function setMenuCollapsed(collapsed) {
+    const menuBar = $('topMenuBar');
+    const arrowBtn = $('toggleMenuShutterBtn');
+    if (collapsed) {
+      menuBar.classList.add('collapsed');
+      document.body.classList.add('menu-collapsed');
+      arrowBtn.textContent = '▼';
+      arrowBtn.title = 'Show Menu';
+    } else {
+      menuBar.classList.remove('collapsed');
+      document.body.classList.remove('menu-collapsed');
+      arrowBtn.textContent = '▲';
+      arrowBtn.title = 'Hide Menu';
+    }
+    localStorage.setItem('talha_menu_collapsed', collapsed ? '1' : '0');
+  }
+
+  $('toggleMenuShutterBtn').onclick = () => {
+    const isNowCollapsed = !$('topMenuBar').classList.contains('collapsed');
+    setMenuCollapsed(isNowCollapsed);
+  };
+
+  if (localStorage.getItem('talha_menu_collapsed') === '1') {
+    setMenuCollapsed(true);
+  }
+
+  // Banking-Style Privacy Mask for Buy Rate & Margin % (5-Second Auto-Hide)
+  const privacyMaskTimers = new WeakMap();
+
+  function makePrivacyMask(maskedText, realText, extraClasses, extraStyle) {
+    const cls = 'privacy-mask' + (extraClasses ? ' ' + extraClasses : '');
+    const st = extraStyle ? ` style="${extraStyle}"` : '';
+    return `<span class="${cls}" data-masked="${escapeHtml(maskedText)}" data-real="${escapeHtml(realText)}"${st} onclick="event.stopPropagation();togglePrivacyMask(this)" title="Tap to view for 5 seconds">${escapeHtml(maskedText)}</span>`;
+  }
+
+  window.togglePrivacyMask = function(el) {
+    if (!el) return;
+    const maskedLabel = el.getAttribute('data-masked') || '***** 👁️';
+    if (privacyMaskTimers.has(el)) {
+      clearTimeout(privacyMaskTimers.get(el));
+      privacyMaskTimers.delete(el);
+    }
+    if (el.classList.contains('revealed')) {
+      el.classList.remove('revealed');
+      el.textContent = maskedLabel;
+      return;
+    }
+    el.classList.add('revealed');
+    el.textContent = el.getAttribute('data-real') || '';
+    const timer = setTimeout(() => {
+      el.classList.remove('revealed');
+      el.textContent = maskedLabel;
+      privacyMaskTimers.delete(el);
+    }, 5000);
+    privacyMaskTimers.set(el, timer);
+  };
+
+  function parseSheetItems(rows) {
+    return (rows || []).map((row, idx) => {
+      const vals = Object.values(row);
+      const name = String(row['Item Name'] || row['Item'] || row.Name || row.name || vals[1] || '').trim();
+      const brand = String(row['Brand Name'] || row['Brand'] || row.brand || vals[2] || '').trim();
+      let buy = Number(row['Purchase Price'] || row['Buy Price'] || row.buy || vals[3] || 0);
+      let margin = Number(row['Profit Margin (%)'] || row['Margin %'] || row.margin || vals[4] || 0);
+      let sell = Number(row['Sell Price'] || row.sell || vals[5] || 0);
+      if (sell === 0 && margin > 0 && buy > 0) sell = +(buy + (buy * margin / 100)).toFixed(2);
+      else if (margin === 0 && sell > 0 && buy > 0) margin = +(((sell - buy) / buy) * 100).toFixed(1);
+      const id = String(row.ID || row.id || vals[0] || ('ROW_' + (idx + 1) + '_' + name.toLowerCase().replace(/\W+/g, '_'))).trim();
+      return { id, name, brand, buy, margin, sell };
+    }).filter(x => x.name.length > 0);
+  }
+
+  // ==========================================
+  // LIVE CROSS-USER NOTIFICATION SYSTEM
+  // ==========================================
+  function getActorLabel() {
+    if (!currentUser) return 'User';
+    return `${currentUser.role === 'Admin' ? 'Admin' : 'Staff'}/${currentUser.username}`;
+  }
+
+  function formatItemWithBrand(name, brand) {
+    return brand ? `${name} of ${brand}` : name;
+  }
+
+  function triggerLiveAlert(messageText, uniqueKey) {
+    if (uniqueKey) {
+      if (seenActivityKeys.has(uniqueKey)) return;
+      seenActivityKeys.add(uniqueKey);
+      const arr = Array.from(seenActivityKeys).slice(-250);
+      seenActivityKeys = new Set(arr);
+      localStorage.setItem('talha_seen_act', JSON.stringify(arr));
+    }
+
+    const banner = $('liveNotifBanner');
+    $('liveNotifText').textContent = messageText;
+    banner.classList.add('show');
+    if (notifBannerTimer) clearTimeout(notifBannerTimer);
+    notifBannerTimer = setTimeout(() => banner.classList.remove('show'), 9000);
+
+    if ('Notification' in window && Notification.permission === 'granted') {
+      try {
+        new Notification('Inventory Update', { body: messageText, silent: false });
+      } catch (e) {}
+    }
+  }
+
+  $('closeNotifBannerBtn').onclick = () => $('liveNotifBanner').classList.remove('show');
+
+  function refreshNotifPermissionLabel() {
+    if (!('Notification' in window)) {
+      $('notifStateText').textContent = 'Banner Only';
+      return;
+    }
+    $('notifStateText').textContent = Notification.permission === 'granted' ? 'On' : 'Off';
+  }
+
+  $('enableNotifBtn').onclick = async () => {
+    if (!('Notification' in window)) { alert('In-app live banner alerts are active.'); return; }
+    if (Notification.permission !== 'granted') await Notification.requestPermission();
+    refreshNotifPermissionLabel();
+  };
+
+  function detectRemoteItemChanges(newItemsList) {
+    if (!lastKnownItemsMap) {
+      lastKnownItemsMap = new Map(newItemsList.map(it => [it.id, it]));
+      return;
+    }
+    const newMap = new Map(newItemsList.map(it => [it.id, it]));
+    newMap.forEach((curr, id) => {
+      const prev = lastKnownItemsMap.get(id);
+      if (!prev) {
+        triggerLiveAlert(`User added a new item ${formatItemWithBrand(curr.name, curr.brand)} worth price ₹${Number(curr.sell).toLocaleString('en-IN')}.`, `ADD_${id}_${curr.sell}`);
+      } else if (Number(prev.sell) !== Number(curr.sell) || prev.name !== curr.name || prev.brand !== curr.brand) {
+        triggerLiveAlert(`User edited item ${curr.name}${curr.brand ? ' (' + curr.brand + ')' : ''} from ₹${Number(prev.sell).toLocaleString('en-IN')} to ₹${Number(curr.sell).toLocaleString('en-IN')}.`, `EDIT_${id}_${prev.sell}_${curr.sell}`);
+      }
+    });
+    lastKnownItemsMap.forEach((prev, id) => {
+      if (!newMap.has(id)) {
+        triggerLiveAlert(`User deleted item ${formatItemWithBrand(prev.name, prev.brand)}.`, `DEL_${id}`);
+      }
+    });
+    lastKnownItemsMap = newMap;
+  }
+
+  // ==========================================
+  // PERSISTENT LOGIN (NO LOGIN SCREEN ON REFRESH)
+  // ==========================================
+  $('loginBtn').onclick = async () => {
+    const u = $('loginUser').value.trim();
+    const p = $('loginPass').value.trim();
+    if (!u || !p) return;
+    $('loginBtn').disabled = true;
+    $('loginBtn').textContent = 'Logging in...';
+    $('loginErr').textContent = '';
+    try {
+      const res = await fetch(`${WEB_APP_URL}?action=getItems&user=${encodeURIComponent(u)}&pass=${encodeURIComponent(p)}&t=${Date.now()}`);
+      const data = await res.json();
+      if (data.status === 'success') {
+        authCreds = { username: u, password: p };
+        currentUser = data.user;
+        localStorage.setItem('talha_auth', JSON.stringify(authCreds));
+        localStorage.setItem('talha_user_cache', JSON.stringify(currentUser));
+        items = parseSheetItems(data.items);
+        lastKnownItemsMap = new Map(items.map(it => [it.id, it]));
+        localStorage.setItem('talha_inv_cache', JSON.stringify(items));
+        initAppAfterLogin();
+      } else {
+        $('loginErr').textContent = data.message || 'Invalid credentials';
+      }
+    } catch (e) {
+      $('loginErr').textContent = 'Network error. Check internet connection.';
+    } finally {
+      $('loginBtn').disabled = false;
+      $('loginBtn').textContent = 'Login';
+    }
+  };
+
+  $('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') $('loginBtn').click(); });
+
+  function initAppAfterLogin() {
+    $('loginScreen').classList.add('hidden');
+    $('mainApp').classList.remove('hidden');
+    $('loggedUserLabel').textContent = `${currentUser.username} (${currentUser.role})`;
+    refreshNotifPermissionLabel();
+    if (currentUser.perms && currentUser.perms.users) {
+      $('usersTabBtn').classList.remove('hidden');
+      loadUsersList();
+    } else {
+      $('usersTabBtn').classList.add('hidden');
+    }
+    if (currentUser.perms && !currentUser.perms.add && !currentUser.perms.edit) {
+      $('addItemCard').classList.add('hidden');
+    } else {
+      $('addItemCard').classList.remove('hidden');
+    }
+    render();
+    loadBillsHistory();
+    startBackgroundPolling();
+  }
+
+  $('logoutBtn').onclick = () => {
+    localStorage.removeItem('talha_auth');
+    localStorage.removeItem('talha_user_cache');
+    sessionStorage.removeItem('talha_auth');
+    location.reload();
+  };
+
+  // Instant Auto-Restore on Page Refresh (No Login Screen Flash)
+  const savedAuth = localStorage.getItem('talha_auth');
+  const savedUser = localStorage.getItem('talha_user_cache');
+  if (savedAuth && savedUser) {
+    try {
+      authCreds = JSON.parse(savedAuth);
+      currentUser = JSON.parse(savedUser);
+      if (authCreds.username && authCreds.password && currentUser.username) {
+        lastKnownItemsMap = new Map(items.map(it => [it.id, it]));
+        initAppAfterLogin();
+        syncFromServer(true);
+      }
+    } catch (e) {}
+  }
+
+  function activateTopMenuTab(secId) {
+    document.querySelectorAll('.menu-nav-btn[data-sec]').forEach(b => {
+      b.classList.toggle('active', b.getAttribute('data-sec') === secId);
+    });
+    document.querySelectorAll('.app-sec').forEach(s => {
+      s.classList.toggle('hidden', s.id !== secId);
+    });
+    if (secId === 'sec-search') { editingItemId = null; render(); $('search').focus(); }
+    if (secId === 'sec-add') $('item').focus();
+    if (secId === 'sec-billing') { refreshCurrentBillNoUI(); renderBillQuickList(); renderBillTable(); }
+    if (secId === 'sec-history') { renderSavedBillsList(); loadBillsHistory(); }
+  }
+
+  document.querySelectorAll('.menu-nav-btn[data-sec]').forEach(btn => {
+    btn.onclick = () => activateTopMenuTab(btn.getAttribute('data-sec'));
+  });
+
+  $('dashboardAddBtn').onclick = () => {
+    $('item').value = ''; $('brand').value = ''; $('buy').value = ''; $('sell').value = ''; $('margin').value = '';
+    activateTopMenuTab('sec-add');
+  };
+
+  $('clearAddFormBtn').onclick = () => {
+    $('item').value = ''; $('brand').value = ''; $('buy').value = ''; $('sell').value = ''; $('margin').value = '';
+    $('addStatus').textContent = '';
+  };
+
+  // ==========================================
+  // AUTOCOMPLETE FOR ADD NEW ITEM
+  // ==========================================
+  function setupAutocomplete(inputEl, listEl, type) {
+    let activeIndex = -1;
+    let currentMatches = [];
+
+    function updateHighlight() {
+      const optionEls = listEl.querySelectorAll('.autocomplete-item');
+      optionEls.forEach((el, idx) => el.classList.toggle('active', idx === activeIndex));
+    }
+
+    function selectMatch(idx) {
+      if (idx >= 0 && idx < currentMatches.length) {
+        const chosen = currentMatches[idx];
+        inputEl.value = chosen.text;
+        if (type === 'item' && chosen.itemObj) {
+          $('brand').value = chosen.itemObj.brand || '';
+          $('buy').value = chosen.itemObj.buy || '';
+          $('margin').value = chosen.itemObj.margin || '';
+          $('sell').value = chosen.itemObj.sell || '';
+        }
+        listEl.classList.add('hidden');
+        inputEl.focus();
+      }
+    }
+
+    inputEl.addEventListener('input', () => {
+      const val = inputEl.value.trim().toLowerCase();
+      listEl.innerHTML = '';
+      activeIndex = -1;
+      currentMatches = [];
+      if (!val) { listEl.classList.add('hidden'); return; }
+
+      const terms = val.split(/[\s\-]+/).map(t => t.replace(/[^a-z0-9]/g, '')).filter(Boolean);
+      const seen = new Set();
+
+      items.forEach(x => {
+        const targetText = type === 'brand' ? x.brand : x.name;
+        if (!targetText) return;
+        const norm = targetText.toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (terms.every(t => norm.includes(t))) {
+          const key = targetText.toLowerCase();
+          if (!seen.has(key)) {
+            seen.add(key);
+            currentMatches.push({ text: targetText, sub: type === 'item' ? x.brand : '', itemObj: x });
+          }
+        }
+      });
+
+      currentMatches = currentMatches.slice(0, 15);
+      if (!currentMatches.length) { listEl.classList.add('hidden'); return; }
+
+      currentMatches.forEach((m, idx) => {
+        const div = document.createElement('div');
+        div.className = 'autocomplete-item';
+        div.innerHTML = `<span>${escapeHtml(m.text)}</span>` + (m.sub ? `<span class="ac-sub">${escapeHtml(m.sub)}</span>` : '');
+        div.addEventListener('mousedown', e => { e.preventDefault(); selectMatch(idx); });
+        listEl.append(div);
+      });
+      listEl.classList.remove('hidden');
+    });
+
+    inputEl.addEventListener('keydown', e => {
+      if (listEl.classList.contains('hidden') || !currentMatches.length) return;
+      if (e.key === 'ArrowDown') { e.preventDefault(); activeIndex = (activeIndex + 1) % currentMatches.length; updateHighlight(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); activeIndex = (activeIndex - 1 + currentMatches.length) % currentMatches.length; updateHighlight(); }
+      else if (e.key === 'Enter' && activeIndex >= 0) { e.preventDefault(); selectMatch(activeIndex); }
+      else if (e.key === 'Escape') listEl.classList.add('hidden');
+    });
+
+    inputEl.addEventListener('blur', () => setTimeout(() => listEl.classList.add('hidden'), 180));
+  }
+
+  setupAutocomplete($('item'), $('itemSuggestions'), 'item');
+  setupAutocomplete($('brand'), $('brandSuggestions'), 'brand');
+
+  // ==========================================
+  // BUY / MARGIN / SELL LIVE CALCULATION
+  // ==========================================
+  $('buy').addEventListener('input', () => {
+    const b = parseFloat($('buy').value) || 0;
+    const m = parseFloat($('margin').value);
+    const s = parseFloat($('sell').value);
+    if (!isNaN(m) && b > 0) $('sell').value = +(b + (b * m / 100)).toFixed(2);
+    else if (!isNaN(s) && s > 0 && b > 0) $('margin').value = +(((s - b) / b) * 100).toFixed(1);
+  });
+  $('margin').addEventListener('input', () => {
+    const b = parseFloat($('buy').value) || 0;
+    const m = parseFloat($('margin').value) || 0;
+    if (b > 0) $('sell').value = +(b + (b * m / 100)).toFixed(2);
+  });
+  $('sell').addEventListener('input', () => {
+    const b = parseFloat($('buy').value) || 0;
+    const s = parseFloat($('sell').value) || 0;
+    if (b > 0) $('margin').value = +(((s - b) / b) * 100).toFixed(1);
+  });
+
+  async function postInventoryAction(bodyObj) {
+    const res = await fetch(WEB_APP_URL, {
+      method: 'POST',
+      body: JSON.stringify(Object.assign({
+        username: authCreds.username,
+        password: authCreds.password
+      }, bodyObj))
+    });
+    return await res.json();
+  }
+
+  $('save').onclick = async () => {
+    const name = $('item').value.trim();
+    const brand = $('brand').value.trim();
+    const buy = parseFloat($('buy').value);
+    const sell = parseFloat($('sell').value);
+    const margin = parseFloat($('margin').value) || (buy > 0 ? +(((sell - buy) / buy) * 100).toFixed(1) : 0);
+
+    if (!name || isNaN(buy) || isNaN(sell) || sell <= 0) {
+      alert('Please enter valid Item Name, Purchase Price, and Sell Price.');
+      return;
+    }
+
+    const newItem = {
+      id: String(Date.now() + Math.floor(Math.random() * 10000)),
+      name, brand, buy, margin, sell
+    };
+
+    $('save').disabled = true;
+    try {
+      const data = await postInventoryAction({ action: 'save', item: newItem });
+      if (data.status === 'ok') {
+        items.push(newItem);
+        if (lastKnownItemsMap) lastKnownItemsMap.set(newItem.id, newItem);
+        localStorage.setItem('talha_inv_cache', JSON.stringify(items));
+        triggerLiveAlert(`${getActorLabel()} added a new item ${formatItemWithBrand(name, brand)} worth price ₹${sell.toLocaleString('en-IN')}.`, `LOCAL_ADD_${newItem.id}`);
+        $('addStatus').style.color = '#16834b';
+        $('addStatus').textContent = `✓ Added "${name}" successfully!`;
+        $('item').value = ''; $('brand').value = ''; $('buy').value = ''; $('sell').value = ''; $('margin').value = '';
+        render();
+      } else {
+        alert(data.message || 'Could not save item.');
+      }
+    } catch (e) {
+      alert('Network error while saving item.');
+    } finally {
+      $('save').disabled = false;
+    }
+  };
+
+  function filterItemsByQuery(query) {
+    const terms = String(query || '').toLowerCase().split(/[\s\-]+/).map(t => t.replace(/[^a-z0-9]/g, '')).filter(Boolean);
+    return items.filter(x => {
+      if (!terms.length) return true;
+      const hay = (x.name + ' ' + (x.brand || '')).toLowerCase().replace(/[^a-z0-9]/g, '');
+      return terms.every(t => hay.includes(t));
+    }).sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  // ==========================================
+  // STACKED CARD LIST + HIDDEN BUY & MARGIN
+  // ==========================================
+  function render() {
+    $('topItemCount').textContent = items.length;
+    $('invCount').textContent = items.length;
+    const found = filterItemsByQuery($('search').value);
+    const box = $('results');
+    box.innerHTML = '';
+
+    if (!found.length) {
+      box.innerHTML = '<div class="empty">' + ($('search').value ? 'No matching item found.' : 'No items yet.') + '</div>';
+      return;
+    }
+
+    found.forEach(x => {
+      const itemWrapper = document.createElement('div');
+      itemWrapper.className = 'result-wrapper';
+
+      if (editingItemId === x.id) {
+        const currentMargin = x.buy > 0 ? +(((x.sell - x.buy) / x.buy) * 100).toFixed(1) : (x.margin || 0);
+        itemWrapper.innerHTML = `
+          <div style="display:flex;flex-direction:column;gap:8px;padding:4px 0">
+            <div style="font-weight:700;font-size:15px;color:#1e293b">Editing Item</div>
+            <div class="formgrid">
+              <div><label style="margin:4px 0 2px;font-size:12px">Item Name</label><input type="text" class="edit-name" value="${escapeHtml(x.name)}"></div>
+              <div><label style="margin:4px 0 2px;font-size:12px">Brand Name</label><input type="text" class="edit-brand" value="${escapeHtml(x.brand || '')}"></div>
+            </div>
+            <div class="pricegrid">
+              <div><label style="margin:4px 0 2px;font-size:12px">Purchase Price (₹)</label><input type="number" inputmode="decimal" step="0.01" class="edit-buy" value="${x.buy}"></div>
+              <div><label style="margin:4px 0 2px;font-size:12px">Profit Margin (%)</label><input type="number" inputmode="decimal" step="0.1" class="edit-margin" value="${currentMargin}"></div>
+              <div><label style="margin:4px 0 2px;font-size:12px">Sell Price (₹)</label><input type="number" inputmode="decimal" step="0.01" class="edit-sell" value="${x.sell}"></div>
+            </div>
+            <div class="actions" style="margin-top:8px;justify-content:flex-end">
+              <button type="button" class="secondary edit-cancel-btn">Cancel</button>
+              <button type="button" class="success edit-save-btn">Update Item</button>
+            </div>
+          </div>
+        `;
+
+        const buyInp = itemWrapper.querySelector('.edit-buy');
+        const marginInp = itemWrapper.querySelector('.edit-margin');
+        const sellInp = itemWrapper.querySelector('.edit-sell');
+
+        buyInp.addEventListener('input', () => {
+          const b = parseFloat(buyInp.value) || 0;
+          const m = parseFloat(marginInp.value);
+          if (!isNaN(m) && b > 0) sellInp.value = +(b + (b * m / 100)).toFixed(2);
+        });
+        marginInp.addEventListener('input', () => {
+          const b = parseFloat(buyInp.value) || 0;
+          const m = parseFloat(marginInp.value) || 0;
+          if (b > 0) sellInp.value = +(b + (b * m / 100)).toFixed(2);
+        });
+        sellInp.addEventListener('input', () => {
+          const b = parseFloat(buyInp.value) || 0;
+          const s = parseFloat(sellInp.value) || 0;
+          if (b > 0) marginInp.value = +(((s - b) / b) * 100).toFixed(1);
+        });
+
+        itemWrapper.querySelector('.edit-cancel-btn').onclick = () => { editingItemId = null; render(); };
+        itemWrapper.querySelector('.edit-save-btn').onclick = async () => {
+          const name = itemWrapper.querySelector('.edit-name').value.trim();
+          const brand = itemWrapper.querySelector('.edit-brand').value.trim();
+          const buy = parseFloat(buyInp.value);
+          const sell = parseFloat(sellInp.value);
+          const margin = parseFloat(marginInp.value) || (buy > 0 ? +(((sell - buy) / buy) * 100).toFixed(1) : 0);
+          if (!name || isNaN(buy) || isNaN(sell) || sell <= 0) return;
+
+          const oldSell = Number(x.sell) || 0;
+          const updatedItem = { id: x.id, name, brand, buy, sell, margin };
+          const res = await postInventoryAction({ action: 'save', item: updatedItem });
+          if (res.status === 'ok') {
+            const idx = items.findIndex(i => i.id === x.id);
+            if (idx > -1) items[idx] = updatedItem;
+            if (lastKnownItemsMap) lastKnownItemsMap.set(updatedItem.id, updatedItem);
+            localStorage.setItem('talha_inv_cache', JSON.stringify(items));
+            triggerLiveAlert(`${getActorLabel()} edited item ${name}${brand ? ' (' + brand + ')' : ''} from ₹${oldSell.toLocaleString('en-IN')} to ₹${sell.toLocaleString('en-IN')}.`, `LOCAL_EDIT_${x.id}_${Date.now()}`);
+            editingItemId = null;
+            render();
+          }
+        };
+
+        box.append(itemWrapper);
+        return;
+      }
+
+      const row = document.createElement('div');
+      row.className = 'result';
+      const left = document.createElement('div');
+
+      const nm = document.createElement('div');
+      nm.className = 'name';
+      nm.textContent = x.name;
+      left.append(nm);
+
+      if (x.brand) {
+        const meta = document.createElement('div');
+        meta.className = 'meta';
+        meta.textContent = x.brand;
+        left.append(meta);
+      }
+
+      const right = document.createElement('div');
+      right.className = 'prices';
+      const bRate = Number(x.buy) || 0;
+      const sRate = Number(x.sell) || 0;
+      const realBuyStr = 'Buy: ₹' + bRate.toLocaleString('en-IN');
+
+      const price = document.createElement('div');
+      price.innerHTML = makePrivacyMask('Buy: ₹***** 👁️', realBuyStr, '', 'margin-right:6px') + ' <span class="price-sell">Sell: ₹' + sRate.toLocaleString('en-IN') + '</span>';
+      right.append(price);
+
+      const profitAmt = sRate - bRate;
+      const profitPct = bRate > 0 ? ((profitAmt / bRate) * 100).toFixed(1) : (x.margin || 0);
+      const badgeClass = profitAmt >= 0 ? 'profit-good' : 'profit-bad';
+      const realMarginStr = profitAmt >= 0 ? '+₹' + profitAmt.toFixed(2) + ' (' + profitPct + '%)' : '-₹' + Math.abs(profitAmt).toFixed(2) + ' Loss';
+
+      const profitBadge = document.createElement('div');
+      profitBadge.innerHTML = makePrivacyMask('**.*% 👁️', realMarginStr, badgeClass, 'margin-top:6px');
+      right.append(profitBadge);
+
+      const controls = document.createElement('div');
+      controls.className = 'actions item-controls';
+      controls.style.justifyContent = 'flex-end';
+
+      const addBillBtn = document.createElement('button');
+      addBillBtn.type = 'button';
+      addBillBtn.className = 'btn-bill-add';
+      addBillBtn.textContent = '+ Bill';
+      addBillBtn.onclick = () => {
+        addItemToBill(x.brand ? x.name + ' (' + x.brand + ')' : x.name, sRate, bRate, 1);
+        addBillBtn.textContent = '✓ Added';
+        setTimeout(() => addBillBtn.textContent = '+ Bill', 900);
+      };
+
+      const dealBtn = document.createElement('button');
+      dealBtn.type = 'button';
+      dealBtn.className = 'btn-deal';
+      dealBtn.textContent = 'Deal';
+
+      const editBtn = document.createElement('button');
+      editBtn.type = 'button';
+      editBtn.className = 'secondary';
+      editBtn.textContent = 'Edit';
+      editBtn.onclick = () => { editingItemId = x.id; render(); };
+
+      const del = document.createElement('button');
+      del.type = 'button';
+      del.className = 'danger';
+      del.textContent = 'Delete';
+      del.onclick = async () => {
+        if (!confirm('Delete this item?')) return;
+        const res = await postInventoryAction({ action: 'delete', id: x.id });
+        if (res.status === 'ok') {
+          items = items.filter(i => i.id !== x.id);
+          if (lastKnownItemsMap) lastKnownItemsMap.delete(x.id);
+          localStorage.setItem('talha_inv_cache', JSON.stringify(items));
+          triggerLiveAlert(`${getActorLabel()} deleted item ${formatItemWithBrand(x.name, x.brand)}.`, `LOCAL_DEL_${x.id}_${Date.now()}`);
+          render();
+        }
+      };
+
+      controls.append(addBillBtn, dealBtn, editBtn, del);
+      right.append(controls);
+      row.append(left, right);
+      itemWrapper.append(row);
+
+      const calcPanel = document.createElement('div');
+      calcPanel.className = 'calc-panel hidden';
+      calcPanel.innerHTML =
+        '<div style="flex:1 1 100%;font-size:13px;color:#64748b;margin-bottom:-4px"><strong>Temp Deal Calculator</strong></div>' +
+        '<div style="display:flex;align-items:center"><label>Margin %</label><input type="number" inputmode="decimal" class="temp-margin" step="0.1" value="' + profitPct + '"></div>' +
+        '<div style="display:flex;align-items:center"><label>Sell (₹)</label><input type="number" inputmode="decimal" class="temp-sell" step="0.01" value="' + sRate + '"></div>';
+      dealBtn.onclick = () => calcPanel.classList.toggle('hidden');
+      const tm = calcPanel.querySelector('.temp-margin');
+      const ts = calcPanel.querySelector('.temp-sell');
+      tm.addEventListener('input', () => { const m = parseFloat(tm.value); if (!isNaN(m)) ts.value = +(bRate + (bRate * m / 100)).toFixed(2); });
+      ts.addEventListener('input', () => { const s = parseFloat(ts.value); if (!isNaN(s) && bRate > 0) tm.value = +(((s - bRate) / bRate) * 100).toFixed(1); });
+      itemWrapper.append(calcPanel);
+      box.append(itemWrapper);
+    });
+  }
+
+  async function syncFromServer(isSilentBackground) {
+    if (!authCreds.username || !authCreds.password) return;
+    if (!isSilentBackground) $('syncBtn').disabled = true;
+    try {
+      const res = await fetch(`${WEB_APP_URL}?action=getItems&user=${encodeURIComponent(authCreds.username)}&pass=${encodeURIComponent(authCreds.password)}&t=${Date.now()}`);
+      const data = await res.json();
+      if (data.status === 'success') {
+        const freshItems = parseSheetItems(data.items);
+        if (isSilentBackground) detectRemoteItemChanges(freshItems);
+        else lastKnownItemsMap = new Map(freshItems.map(it => [it.id, it]));
+        items = freshItems;
+        localStorage.setItem('talha_inv_cache', JSON.stringify(items));
+        render();
+        renderBillQuickList();
+        $('syncTimeLabel').textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        if (!isSilentBackground) {
+          $('syncStatus').style.color = '#16834b';
+          $('syncStatus').textContent = `✓ Synced ${items.length} items!`;
+        }
+      } else if (data.status === 'error' && /Invalid|Denied/i.test(data.message || '')) {
+        localStorage.removeItem('talha_auth');
+        localStorage.removeItem('talha_user_cache');
+        location.reload();
+      }
+    } catch (e) {
+    } finally {
+      if (!isSilentBackground) $('syncBtn').disabled = false;
+    }
+  }
+
+  $('syncBtn').onclick = () => syncFromServer(false);
+  $('search').addEventListener('input', render);
+
+  function startBackgroundPolling() {
+    if (pollingStarted) return;
+    pollingStarted = true;
+    setInterval(() => {
+      if (authCreds.username && navigator.onLine) syncFromServer(true);
+    }, 12000);
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && authCreds.username && navigator.onLine) syncFromServer(true);
+    });
+  }
+
+  // ==========================================
+  // BILLING & 80MM THERMAL ROLL PRINT
+  // ==========================================
+  function updateBillBadge() {
+    $('billBadgeCount').textContent = billItems.length;
+  }
+
+  function addItemToBill(name, rate, buyPrice, qty) {
+    const existing = billItems.find(b => b.name === name && Number(b.rate) === Number(rate));
+    if (existing) existing.qty += Number(qty || 1);
+    else billItems.push({ uid: Date.now() + Math.random(), name, rate: Number(rate), buy: Number(buyPrice) || 0, qty: Number(qty) || 1 });
+    updateBillBadge();
+    renderBillTable();
+  }
+
+  function renderBillQuickList() {
+    const listEl = $('billQuickList');
+    const found = filterItemsByQuery($('billSearch').value).slice(0, 30);
+    listEl.innerHTML = '';
+    if (!found.length) { listEl.innerHTML = '<div class="empty">No matching item.</div>'; return; }
+    found.forEach(x => {
+      const div = document.createElement('div');
+      div.className = 'quick-pick-item';
+      const displayName = x.brand ? x.name + ' (' + x.brand + ')' : x.name;
+      const bRate = Number(x.buy) || 0;
+      const sRate = Number(x.sell) || 0;
+      const profitAmt = sRate - bRate;
+      const profitPct = bRate > 0 ? ((profitAmt / bRate) * 100).toFixed(1) : (x.margin || 0);
+
+      div.innerHTML = `
+        <div>
+          <div style="font-weight:650;font-size:14px">${escapeHtml(x.name)}${x.brand ? ' <span style="color:#0055ff;font-size:12px">(' + escapeHtml(x.brand) + ')</span>' : ''}</div>
+          <div class="qp-badges">
+            ${makePrivacyMask('Buy: ₹***** 👁️', 'Buy: ₹' + bRate.toLocaleString('en-IN'), '', 'font-size:11px;padding:2px 7px')}
+            <span class="qp-sell">Sell: ₹${sRate.toLocaleString('en-IN')}</span>
+            ${makePrivacyMask('Margin: **% 👁️', 'Margin: ' + profitPct + '%', profitAmt >= 0 ? 'profit-good' : 'profit-bad', 'font-size:11px;padding:2px 7px')}
+          </div>
+        </div>
+      `;
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn-bill-add btn-sm';
+      btn.textContent = '+ Add';
+      btn.onclick = () => addItemToBill(displayName, sRate, bRate, 1);
+      div.append(btn);
+      listEl.append(div);
+    });
+  }
+
+  $('billSearch').addEventListener('input', renderBillQuickList);
+
+  function computeAdjustment(subTotal, rawInput) {
+    const str = String(rawInput || '').trim();
+    if (!str) return { amount: 0, raw: '' };
+    const isPct = str.endsWith('%');
+    const val = parseFloat(isPct ? str.slice(0, -1).trim() : str);
+    if (isNaN(val)) return { amount: 0, raw: str };
+    return { amount: Number((isPct ? (subTotal * val / 100) : val).toFixed(2)), raw: str };
+  }
+
+  function renderBillTable() {
+    const tbody = $('billTableBody');
+    tbody.innerHTML = '';
+    if (!billItems.length) {
+      tbody.innerHTML = '<tr><td colspan="6" class="empty">No items added to bill yet.</td></tr>';
+      $('billSubTotal').textContent = '₹0.00';
+      $('billAdjCalculated').textContent = '₹0.00';
+      $('billGrandTotal').textContent = '₹0.00';
+      $('dueAmountRow').classList.add('hidden');
+      return;
+    }
+
+    let subTotal = 0;
+    billItems.forEach((b, index) => {
+      const qtyNum = Number(b.qty) || 1;
+      const rateNum = Number(b.rate) || 0;
+      const lineTotal = qtyNum * rateNum;
+      subTotal += lineTotal;
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${index + 1}</td>
+        <td style="font-weight:600">${escapeHtml(b.name)}</td>
+        <td style="text-align:right"><input type="number" step="0.01" class="bill-inp" value="${rateNum}" onchange="updateBillItem(${index}, 'rate', this.value)"></td>
+        <td style="text-align:center"><input type="number" min="1" class="bill-inp bill-qty" value="${qtyNum}" onchange="updateBillItem(${index}, 'qty', this.value)"></td>
+        <td style="text-align:right;font-weight:700">₹${lineTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+        <td style="text-align:center"><button type="button" class="danger btn-sm" onclick="removeBillItem(${index})">✕</button></td>
+      `;
+      tbody.append(tr);
+    });
+
+    const adjObj = computeAdjustment(subTotal, $('billAdjustment').value);
+    const grandTotal = Math.max(0, subTotal + adjObj.amount);
+    const rawAdvStr = $('billAdvance').value.trim();
+    const isFullPaid = (rawAdvStr === '') || (parseFloat(rawAdvStr) >= grandTotal);
+    const advance = isFullPaid ? grandTotal : Math.max(0, parseFloat(rawAdvStr) || 0);
+    const dueAmount = isFullPaid ? 0 : Math.max(0, grandTotal - advance);
+
+    $('billSubTotal').textContent = '₹' + subTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    $('billAdjCalculated').textContent = (adjObj.amount > 0 ? '+₹' : adjObj.amount < 0 ? '-₹' : '₹') + Math.abs(adjObj.amount).toFixed(2);
+    $('billGrandTotal').textContent = '₹' + grandTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    if (dueAmount > 0.009) {
+      $('dueAmountRow').classList.remove('hidden');
+      $('billDueAmount').textContent = '₹' + dueAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    } else {
+      $('dueAmountRow').classList.add('hidden');
+    }
+  }
+
+  window.updateBillItem = function(idx, field, val) {
+    const num = parseFloat(val);
+    if (isNaN(num) || num < 0) return;
+    billItems[idx][field] = field === 'qty' ? Math.max(1, parseInt(num, 10)) : num;
+    renderBillTable();
+  };
+
+  window.removeBillItem = function(idx) {
+    billItems.splice(idx, 1);
+    updateBillBadge();
+    renderBillTable();
+  };
+
+  $('billAdjustment').addEventListener('input', renderBillTable);
+  $('billAdvance').addEventListener('input', renderBillTable);
+
+  function getNextBillNo() {
+    let maxSeq = 0;
+    savedBills.forEach(b => {
+      const n = parseInt(String(b.billNo || '0').replace(/\D/g, ''), 10);
+      if (!isNaN(n) && n > maxSeq) maxSeq = n;
+    });
+    return String(maxSeq + 1).padStart(3, '0');
+  }
+
+  function refreshCurrentBillNoUI() {
+    if (!editingBillId) currentBillNo = getNextBillNo();
+    $('currentBillNoBadge').textContent = 'Bill No: ' + currentBillNo;
+    $('uiBillNoLabel').textContent = currentBillNo;
+    $('histBadgeCount').textContent = savedBills.length;
+  }
+
+  $('clearBillBtn').onclick = () => {
+    if (billItems.length && !confirm('Start a new blank bill?')) return;
+    billItems = [];
+    editingBillId = null;
+    editingBillNo = null;
+    refreshCurrentBillNoUI();
+    $('billCustName').value = '';
+    $('billAdjustment').value = '';
+    $('billAdvance').value = '';
+    $('billActionStatus').textContent = '';
+    updateBillBadge();
+    renderBillTable();
+  };
+
+  $('saveBillBtn').onclick = async () => {
+    if (!billItems.length) { alert('Please add at least one item.'); return; }
+    const cust = $('billCustName').value.trim() || 'Cash Customer';
+    const dateInputVal = $('billDate').value || new Date().toISOString().slice(0, 10);
+    const subTotal = billItems.reduce((s, b) => s + ((Number(b.rate) || 0) * (Number(b.qty) || 1)), 0);
+    const adjObj = computeAdjustment(subTotal, $('billAdjustment').value);
+    const grandTotal = Math.max(0, subTotal + adjObj.amount);
+    const rawAdvStr = $('billAdvance').value.trim();
+    const isFullPaid = (rawAdvStr === '') || (parseFloat(rawAdvStr) >= grandTotal);
+    const advance = isFullPaid ? grandTotal : Math.max(0, parseFloat(rawAdvStr) || 0);
+    const dueAmount = isFullPaid ? 0 : Math.max(0, grandTotal - advance);
+
+    const billNoToUse = editingBillId ? editingBillNo : getNextBillNo();
+    const billIdToUse = editingBillId || ('BILL_' + Date.now());
+    const billRecord = {
+      billId: billIdToUse,
+      billNo: billNoToUse,
+      customer: cust,
+      date: dateInputVal,
+      items: JSON.parse(JSON.stringify(billItems)),
+      subTotal,
+      adjustmentRaw: adjObj.raw,
+      adjustmentAmount: adjObj.amount,
+      advance,
+      grandTotal,
+      dueAmount
+    };
+
+    const res = await postInventoryAction({ action: 'saveBill', bill: billRecord });
+    if (res.status === 'ok') {
+      editingBillId = billIdToUse;
+      editingBillNo = billNoToUse;
+      currentBillNo = billNoToUse;
+      const idx = savedBills.findIndex(x => String(x.billId || x.billNo) === String(billIdToUse));
+      if (idx > -1) savedBills[idx] = billRecord;
+      else savedBills.unshift(billRecord);
+      localStorage.setItem('talha_bills_cache', JSON.stringify(savedBills));
+      refreshCurrentBillNoUI();
+      renderSavedBillsList();
+      $('billActionStatus').style.color = '#16834b';
+      $('billActionStatus').textContent = `✓ Bill No: ${billNoToUse} saved!`;
+    }
+  };
+
+  function formatPrintDate(rawDate) {
+    const d = rawDate ? new Date(rawDate) : new Date();
+    if (!isNaN(d.getTime())) {
+      return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+    return String(rawDate || '');
+  }
+
+  function build80mmReceiptHtml() {
+    const cust = $('billCustName').value.trim() || 'Cash Customer';
+    const dt = formatPrintDate($('billDate').value);
+    const subTotal = billItems.reduce((s, b) => s + ((Number(b.rate) || 0) * (Number(b.qty) || 1)), 0);
+    const adjObj = computeAdjustment(subTotal, $('billAdjustment').value);
+    const grandTotal = Math.max(0, subTotal + adjObj.amount);
+    const rawAdvStr = $('billAdvance').value.trim();
+    const isFullPaid = (rawAdvStr === '') || (parseFloat(rawAdvStr) >= grandTotal);
+    const advance = isFullPaid ? grandTotal : Math.max(0, parseFloat(rawAdvStr) || 0);
+    const dueAmount = isFullPaid ? 0 : Math.max(0, grandTotal - advance);
+
+    const rowsHtml = billItems.map((b, i) => `
+      <tr>
+        <td style="border-bottom:1px dashed #000;padding:3px 1px;vertical-align:top;width:14px">${i + 1}.</td>
+        <td style="border-bottom:1px dashed #000;padding:3px 2px;vertical-align:top;word-break:break-word">${escapeHtml(b.name)}</td>
+        <td style="border-bottom:1px dashed #000;padding:3px 1px;vertical-align:top;text-align:right;white-space:nowrap">${Number(b.qty) || 1}x${Number(b.rate) || 0}</td>
+        <td style="border-bottom:1px dashed #000;padding:3px 1px;vertical-align:top;text-align:right;white-space:nowrap">${((Number(b.qty) || 1) * (Number(b.rate) || 0)).toFixed(2)}</td>
+      </tr>
+    `).join('');
+
+    return `
+      <div style="width:100%">
+        <div style="display:flex;justify-content:space-between;border-bottom:1.5px solid #000;padding-bottom:4px;margin-bottom:4px">
+          <div><strong>Bill:</strong> ${escapeHtml(editingBillNo || currentBillNo)}</div>
+          <div style="text-align:right"><strong>Date:</strong> ${escapeHtml(dt)}</div>
+        </div>
+        <div style="border-bottom:1px dashed #000;padding-bottom:4px;margin-bottom:4px;word-break:break-word">
+          <strong>Cust:</strong> ${escapeHtml(cust)}
+        </div>
+        <table style="width:100%;border-collapse:collapse;font-size:8.5pt">
+          <thead>
+            <tr style="border-bottom:1px solid #000">
+              <th style="text-align:left;padding:2px 1px">#</th>
+              <th style="text-align:left;padding:2px">Item</th>
+              <th style="text-align:right;padding:2px 1px">Qty*Rt</th>
+              <th style="text-align:right;padding:2px 1px">Amt</th>
+            </tr>
+          </thead>
+          <tbody>${rowsHtml}</tbody>
+        </table>
+        <div style="margin-top:5px;text-align:right;font-size:8.5pt">
+          ${adjObj.amount !== 0 ? `<div>Sub Total: ${subTotal.toFixed(2)}</div><div>Adj (${escapeHtml(adjObj.raw)}): ${adjObj.amount.toFixed(2)}</div>` : ''}
+          <div style="font-size:10.5pt;font-weight:bold;border-top:1px solid #000;border-bottom:1px solid #000;padding:3px 0;margin:3px 0">TOTAL: Rs. ${grandTotal.toFixed(2)}</div>
+          ${dueAmount > 0.009 ? `<div>Advance: ${advance.toFixed(2)}</div><div style="font-weight:bold">Due: ${dueAmount.toFixed(2)}</div>` : ''}
+        </div>
+        <div style="margin-top:6px;font-size:7.5pt;line-height:1.3;border-top:1px dashed #000;padding-top:4px">
+          <div style="font-weight:bold;margin-bottom:2px">Terms &amp; Conditions:</div>
+          <ol style="margin:0;padding-left:13px">
+            <li>Goods once sold will not be taken back or exchanged.</li>
+            <li>Warranty/Guarantee is covered solely by the respective Brand/Manufacturer Service Center.</li>
+            <li>No warranty on burnt, physically damaged, or tampered items.</li>
+            <li>Please check items and quantity at the time of delivery.</li>
+            <li>Subject to Kolkata Jurisdiction only.</li>
+          </ol>
+        </div>
+        <div style="margin-top:6px;padding-top:4px;border-top:1px dashed #000;text-align:center;font-size:8pt;font-weight:bold">
+          Thank you for your business!<br>Please visit us again.
+        </div>
+      </div>
+    `;
+  }
+
+  $('printOnlyBtn').onclick = () => {
+    if (!billItems.length) { alert('Please add at least one item before printing.'); return; }
+    const html = build80mmReceiptHtml();
+    $('printInvoiceArea').innerHTML = html;
+    $('printModalBody').innerHTML = html;
+    $('printPreviewModal').classList.add('open');
+    try {
+      window.print();
+    } catch (e) {}
+  };
+
+  $('triggerSystemPrintBtn').onclick = () => {
+    $('printInvoiceArea').innerHTML = build80mmReceiptHtml();
+    try {
+      window.print();
+    } catch (e) {
+      alert('Use browser menu (⋮ > Share / Print) to print this preview.');
+    }
+  };
+
+  $('closePrintModalBtn').onclick = () => {
+    $('printPreviewModal').classList.remove('open');
+  };
+
+  // ==========================================
+  // BILLING HISTORY (WITH DELETE) & STAFF USERS
+  // ==========================================
+  async function loadBillsHistory() {
+    try {
+      const res = await fetch(`${WEB_APP_URL}?action=getBills&user=${encodeURIComponent(authCreds.username)}&pass=${encodeURIComponent(authCreds.password)}&t=${Date.now()}`);
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        savedBills = data;
+        localStorage.setItem('talha_bills_cache', JSON.stringify(savedBills));
+        refreshCurrentBillNoUI();
+        renderSavedBillsList();
+      }
+    } catch (e) {}
+  }
+
+  function renderSavedBillsList() {
+    const query = $('savedBillSearch').value.trim().toLowerCase();
+    const resultsBox = $('savedBillsResults');
+    resultsBox.innerHTML = '';
+
+    const filtered = savedBills.filter(b =>
+      String(b.billNo).toLowerCase().includes(query) ||
+      String(b.customer).toLowerCase().includes(query)
+    );
+
+    if (!filtered.length) {
+      resultsBox.innerHTML = '<div class="empty">No matching saved bills found.</div>';
+      return;
+    }
+
+    filtered.forEach(b => {
+      const uid = String(b.billId || b.billNo);
+      const dueVal = Number(b.dueAmount || 0);
+      const statusHtml = dueVal > 0.009
+        ? ` | Due: <b style="color:#b91c1c">₹${dueVal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</b>`
+        : ` | <b style="color:#16834b">Paid in Full</b>`;
+
+      const div = document.createElement('div');
+      div.className = 'panel';
+      div.style.marginBottom = '10px';
+      div.style.background = '#fafbfc';
+      div.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+          <div>
+            <div style="font-weight:700;font-size:15px">Bill No: ${escapeHtml(b.billNo)} <span style="font-weight:400;font-size:12.5px;color:#64748b">(${escapeHtml(formatPrintDate(b.date))})</span></div>
+            <div style="font-size:13.5px;color:#334155">Customer: <b>${escapeHtml(b.customer)}</b></div>
+            <div style="font-size:12.5px;color:#0f766e">Items: ${(b.items || []).length} | Total: ₹${Number(b.grandTotal).toLocaleString('en-IN', { minimumFractionDigits: 2 })}${statusHtml}</div>
+          </div>
+          <div style="display:flex;gap:6px">
+            <button type="button" class="btn-sm" onclick="viewSavedBill('${escapeHtml(uid)}')">View / Edit</button>
+            <button type="button" class="danger btn-sm" onclick="deleteSavedBill('${escapeHtml(uid)}', '${escapeHtml(b.billNo)}')">Delete</button>
+          </div>
+        </div>
+      `;
+      resultsBox.append(div);
+    });
+  }
+
+  window.viewSavedBill = function(uid) {
+    const b = savedBills.find(x => String(x.billId || x.billNo) === String(uid));
+    if (!b) return;
+    editingBillId = String(b.billId || b.billNo);
+    editingBillNo = b.billNo;
+    currentBillNo = b.billNo;
+    refreshCurrentBillNoUI();
+    $('billCustName').value = b.customer || '';
+    if (b.date && /^\d{4}-\d{2}-\d{2}$/.test(b.date)) $('billDate').value = b.date;
+    $('billAdjustment').value = b.adjustmentRaw || (b.adjustmentAmount ? String(b.adjustmentAmount) : '');
+    $('billAdvance').value = Number(b.dueAmount || 0) > 0.009 ? (b.advance || 0) : '';
+    billItems = JSON.parse(JSON.stringify(b.items || []));
+    updateBillBadge();
+    renderBillTable();
+    activateTopMenuTab('sec-billing');
+  };
+
+  window.deleteSavedBill = async function(uid, billNo) {
+    if (!confirm(`Delete Bill #${billNo}?`)) return;
+    savedBills = savedBills.filter(x => String(x.billId || x.billNo) !== String(uid));
+    localStorage.setItem('talha_bills_cache', JSON.stringify(savedBills));
+    refreshCurrentBillNoUI();
+    renderSavedBillsList();
+    try {
+      await postInventoryAction({ action: 'deleteBill', billId: uid, billNo: billNo });
+    } catch (e) {}
+  };
+
+  $('savedBillSearch').addEventListener('input', renderSavedBillsList);
+  $('syncBillsBtn').onclick = loadBillsHistory;
+
+  async function loadUsersList() {
+    try {
+      const res = await fetch(`${WEB_APP_URL}?action=getUsers&user=${encodeURIComponent(authCreds.username)}&pass=${encodeURIComponent(authCreds.password)}&t=${Date.now()}`);
+      const data = await res.json();
+      if (data.status === 'success') {
+        $('usersTableBody').innerHTML = (data.users || []).map(u => `
+          <tr>
+            <td><strong>${escapeHtml(u.username)}</strong></td>
+            <td>${escapeHtml(u.role)}</td>
+            <td>${u.perms.add ? '✓' : '✕'}</td>
+            <td>${u.perms.edit ? '✓' : '✕'}</td>
+            <td>${u.perms.del ? '✓' : '✕'}</td>
+            <td>${u.username.toLowerCase() !== 'admin' ? `<button type="button" class="danger btn-sm" onclick="deleteStaffUser('${escapeHtml(u.username)}')">Delete</button>` : '-'}</td>
+          </tr>
+        `).join('');
+      }
+    } catch (e) {}
+  }
+
+  $('saveUserBtn').onclick = async () => {
+    const targetUser = {
+      username: $('uNewName').value.trim(),
+      password: $('uNewPass').value.trim(),
+      role: $('uNewRole').value,
+      perms: { add: $('uPermAdd').checked, edit: $('uPermEdit').checked, del: $('uPermDel').checked, users: $('uNewRole').value === 'Admin' }
+    };
+    if (!targetUser.username || !targetUser.password) return;
+    await postInventoryAction({ action: 'saveUser', targetUser });
+    $('uNewName').value = ''; $('uNewPass').value = '';
+    loadUsersList();
+  };
+
+  window.deleteStaffUser = async function(targetUsername) {
+    if (!confirm('Delete user ' + targetUsername + '?')) return;
+    await postInventoryAction({ action: 'deleteUser', targetUsername });
+    loadUsersList();
+  };
+
+  function parseCSV(text) {
+    const rows = []; let row = [], cell = '', quoted = false;
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i], n = text[i + 1];
+      if (c === '"' && quoted && n === '"') { cell += '"'; i++; }
+      else if (c === '"') quoted = !quoted;
+      else if (c === ',' && !quoted) { row.push(cell); cell = ''; }
+      else if ((c === '\n' || c === '\r') && !quoted) { if (c === '\r' && n === '\n') i++; row.push(cell); if (row.some(v => v.trim())) rows.push(row); row = []; cell = ''; }
+      else cell += c;
+    }
+    row.push(cell); if (row.some(v => v.trim())) rows.push(row); return rows;
+  }
+
+  $('file').onchange = async e => {
+    const f = e.target.files[0]; if (!f) return;
+    const text = (await f.text()).replace(/^\uFEFF/, '');
+    const rows = parseCSV(text);
+    const head = rows[0].map(x => String(x).toLowerCase().trim());
+    const ni = head.findIndex(x => x.includes('name') || x.includes('item'));
+    const bi = head.findIndex(x => x.includes('brand'));
+    const pi = head.findIndex(x => x.includes('purchase') || x.includes('buy'));
+    const si = head.findIndex(x => x.includes('sell') || x.includes('sale'));
+    const mi = head.findIndex(x => x.includes('margin') || x.includes('profit'));
+    const batch = [];
+    rows.slice(1).forEach(r => {
+      const name = (r[ni] || '').trim();
+      const brand = bi >= 0 ? (r[bi] || '').trim() : '';
+      const buy = Number(String(r[pi] || '').replace(/[₹,%,\s]/g, '')) || 0;
+      let sell = si >= 0 && r[si] ? Number(String(r[si]).replace(/[₹,\s]/g, '')) || 0 : 0;
+      let margin = mi >= 0 && r[mi] ? Number(String(r[mi]).replace(/[%,\s]/g, '')) || 0 : 0;
+      if (!sell && margin && buy) sell = +(buy + (buy * margin / 100)).toFixed(2);
+      if (name && sell > 0) {
+        batch.push({ id: String(Date.now() + Math.floor(Math.random() * 100000)), name, brand, buy, margin, sell });
+      }
+    });
+    if (batch.length) {
+      await postInventoryAction({ action: 'bulk', items: batch });
+      items = items.concat(batch);
+      localStorage.setItem('talha_inv_cache', JSON.stringify(items));
+      render();
+      alert(batch.length + ' items imported!');
+    }
+    e.target.value = '';
+  };
+
+  $('template').onclick = () => {
+    const csv = 'Item Name,Brand Name,Purchase Price,Profit Margin (%),Sell Price\r\n16A Switch,Havells,88,,120\r\n2MP Dome Camera,CP Plus,850,20,';
+    const a = document.createElement('a');
+    a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+    a.download = 'sample-pricing-format.csv';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  };
+
+  $('billDate').value = new Date().toISOString().slice(0, 10);
+})();
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js');
+}
+</script>
+</body>
+</html>
